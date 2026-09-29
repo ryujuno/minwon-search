@@ -3,233 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="민원인이 원하는 민원 서비스를 서비스명 검색과 민원분야 필터로 빠르게 찾는 페이지">
+<meta name="description" content="서비스명 검색과 민원분야 필터로 필요한 민원 서비스를 쉽고 빠르게 찾는 페이지">
+<meta name="theme-color" content="#fbf3ee">
 <title>민원서비스 찾기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   :root {
-    --bg: #f4f6fa;
-    --surface: #ffffff;
-    --text: #1b2230;
-    --muted: #5b6577;
-    --line: #dde2ea;
-    --primary: #1f4fa3;
-    --primary-soft: #e8effb;
-    --focus: #f0a500;
-    --ok: #16794a;
-    --ok-soft: #e3f4ea;
-    --no: #9a3b12;
-    --no-soft: #fbece4;
-    --mark: #fff1a8;
-    --radius: 12px;
-    --shadow: 0 1px 2px rgba(20, 30, 50, .06), 0 2px 8px rgba(20, 30, 50, .05);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #11151c;
-      --surface: #1a202a;
-      --text: #e8ecf2;
-      --muted: #a2acbd;
-      --line: #2e3643;
-      --primary: #7fa8f0;
-      --primary-soft: #22304a;
-      --ok: #6fd3a0;
-      --ok-soft: #173327;
-      --no: #f2a37b;
-      --no-soft: #3a2519;
-      --mark: #6b5a00;
-      --shadow: none;
-    }
+    --text: #1f2640;
+    --muted: #5f6784;
+    --brand: #f06a4a;
+    --focus: #5b7cff;
+    --ok: #0f9a72;
+    --no: #c25a26;
+    --glass: rgba(255, 255, 255, .52);
+    --glass-strong: rgba(255, 255, 255, .7);
+    --glass-line: rgba(255, 255, 255, .75);
+    --shadow: 0 8px 32px rgba(60, 70, 120, .10);
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0;
-    background: var(--bg);
+    margin: 0; min-height: 100vh;
     color: var(--text);
-    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
-    font-size: 16px;
-    line-height: 1.55;
-    word-break: keep-all;
+    background: #fbf3ee;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    line-height: 1.55; word-break: keep-all;
   }
-  a { color: var(--primary); }
-  .skip {
-    position: absolute; left: -9999px; top: 0;
-    background: var(--primary); color: #fff; padding: 8px 12px; z-index: 10;
-  }
-  .skip:focus { left: 8px; top: 8px; }
-  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  /* 유리 뒤로 비치는 배경 */
+  .bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .bg i { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .75; }
+  .bg i:nth-child(1) { width: 46vw; height: 46vw; background: #ffc2a6; top: -12vw; left: -10vw; }
+  .bg i:nth-child(2) { width: 40vw; height: 40vw; background: #a9d8ff; top: 8vw; right: -12vw; }
+  .bg i:nth-child(3) { width: 42vw; height: 42vw; background: #b8f0d6; bottom: -14vw; left: 20vw; }
+  .bg i:nth-child(4) { width: 30vw; height: 30vw; background: #ffe79a; bottom: 10vw; right: 5vw; opacity: .55; }
+  @media (max-width: 640px) { .bg i { filter: blur(50px); } .bg i:nth-child(1){width:90vw;height:90vw} .bg i:nth-child(2){width:80vw;height:80vw;top:40vh} .bg i:nth-child(3){width:90vw;height:90vw} }
 
-  header {
-    background: var(--primary);
-    color: #fff;
-    padding: 28px 16px 72px;
+  .glass {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid var(--glass-line);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.8);
   }
-  @media (prefers-color-scheme: dark) { header { background: #1d3566; } }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 10px; }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 12px; top: 12px; background: #fff; padding: 8px 12px; z-index: 10; }
   .wrap { max-width: 1080px; margin: 0 auto; }
-  header h1 { margin: 0 0 6px; font-size: clamp(1.5rem, 4vw, 2rem); letter-spacing: -0.02em; }
-  header p { margin: 0; opacity: .9; }
 
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 20px;
-    margin: -52px 16px 0;
-  }
-  @media (min-width: 1112px) { .panel { margin: -52px auto 0; } }
+  .hero { padding: 48px 16px 28px; }
+  .hello { font-weight: 700; font-size: .95rem; color: var(--brand); }
+  .hero h1 { margin: 6px 0 8px; font-size: clamp(1.75rem, 5vw, 2.6rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.25; }
+  .hero p { margin: 0; color: var(--muted); font-size: 1.02rem; }
 
-  .search-label { display: block; font-weight: 700; margin-bottom: 8px; }
+  .panel { margin: 0 16px; border-radius: 28px; padding: 22px; }
+  @media (min-width: 1112px) { .panel { margin: 0 auto; } }
   .search-box { position: relative; }
-  .search-box svg {
-    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-    width: 20px; height: 20px; color: var(--muted); pointer-events: none;
-  }
+  .search-box svg { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; color: var(--muted); pointer-events: none; }
   #q {
-    width: 100%;
-    font: inherit;
-    font-size: 1.05rem;
-    padding: 14px 44px 14px 44px;
-    border: 2px solid var(--line);
-    border-radius: 10px;
-    background: var(--bg);
-    color: var(--text);
+    width: 100%; font: inherit; font-size: 1.1rem; color: var(--text);
+    padding: 16px 48px 16px 52px; border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.9); background: rgba(255,255,255,.75);
+    box-shadow: inset 0 1px 3px rgba(60,70,120,.06);
+    transition: box-shadow .2s, background .2s;
   }
-  #q:focus { border-color: var(--primary); outline: none; background: var(--surface); }
+  #q::placeholder { color: #9aa1b8; }
+  #q:focus { outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(240,106,74,.18); }
   #clearQ {
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    border: 0; background: transparent; color: var(--muted);
-    width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;
-    display: none;
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: none;
+    width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(31,38,64,.06); color: var(--muted);
+    font-size: 1.1rem; cursor: pointer;
   }
-  #clearQ:hover { background: var(--line); }
-  .hint { color: var(--muted); font-size: .88rem; margin: 6px 0 0; }
+  .quick { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 12px; font-size: .9rem; color: var(--muted); }
+  .quick button { font: inherit; font-size: .9rem; border: 0; background: none; padding: 2px 0; cursor: pointer; color: var(--text); text-decoration: underline; text-decoration-color: rgba(31,38,64,.2); text-underline-offset: 4px; }
+  .quick button:hover { color: var(--brand); text-decoration-color: currentColor; }
 
-  fieldset { border: 0; padding: 0; margin: 18px 0 0; }
-  legend { font-weight: 700; margin-bottom: 8px; padding: 0; }
+  .label { display: block; font-weight: 700; font-size: .92rem; margin: 20px 0 10px; color: var(--muted); }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { padding: 0; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip {
-    font: inherit; font-size: .95rem;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--text);
-    padding: 7px 14px;
-    border-radius: 999px;
-    cursor: pointer;
-    min-height: 40px;
-    transition: background .15s, border-color .15s;
+    --c: #f06a4a;
+    display: inline-flex; align-items: center; gap: 7px;
+    font: inherit; font-size: .95rem; font-weight: 600; color: var(--text);
+    background: rgba(255,255,255,.45); border: 1px solid rgba(255,255,255,.8); border-radius: 999px;
+    padding: 8px 15px 8px 11px; min-height: 42px; cursor: pointer;
+    transition: background .15s, color .15s;
   }
-  .chip:hover { border-color: var(--primary); }
-  .chip[aria-pressed="true"] {
-    background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700;
-  }
-  @media (prefers-color-scheme: dark) { .chip[aria-pressed="true"] { color: #0f1520; } }
-  .chip .n { opacity: .75; font-size: .85em; margin-left: 4px; }
+  .chip:hover { background: rgba(255,255,255,.8); }
+  .chip .ic { display: grid; color: var(--c); }
+  .chip .ic svg { width: 17px; height: 17px; }
+  .chip .n { color: var(--muted); font-weight: 500; font-size: .85em; }
+  .chip[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: #fff; }
+  .chip[aria-pressed="true"] .ic, .chip[aria-pressed="true"] .n { color: rgba(255,255,255,.8); }
 
-  .row2 {
-    display: grid; gap: 16px; margin-top: 18px;
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 720px) { .row2 { grid-template-columns: auto 1fr auto; align-items: end; } }
-  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  .seg button {
-    font: inherit; font-size: .95rem; border: 0; background: var(--surface); color: var(--text);
-    padding: 8px 16px; min-height: 40px; cursor: pointer; border-right: 1px solid var(--line);
-  }
-  .seg button:last-child { border-right: 0; }
-  .seg button[aria-pressed="true"] { background: var(--primary-soft); color: var(--primary); font-weight: 700; }
-  .sort label { display: block; font-weight: 700; margin-bottom: 8px; }
+  .row2 { display: grid; gap: 4px 20px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .row2 { grid-template-columns: auto auto 1fr; align-items: end; } }
+  .seg { display: inline-flex; background: rgba(31,38,64,.06); border-radius: 14px; padding: 4px; gap: 2px; }
+  .seg button { font: inherit; font-size: .95rem; font-weight: 600; border: 0; background: transparent; color: var(--muted); padding: 7px 16px; min-height: 38px; border-radius: 10px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: #fff; color: var(--text); box-shadow: 0 2px 8px rgba(60,70,120,.12); }
   select {
-    font: inherit; font-size: .95rem; padding: 8px 12px; min-height: 40px;
-    border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text);
-    width: 100%; max-width: 280px;
+    font: inherit; font-size: .95rem; font-weight: 600; color: var(--text);
+    padding: 9px 36px 9px 14px; min-height: 46px; border: 1px solid rgba(255,255,255,.9); border-radius: 14px; background-color: rgba(255,255,255,.6);
+    appearance: none; cursor: pointer; width: 100%; max-width: 260px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235f6784' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
   }
   .reset {
-    font: inherit; font-size: .95rem; min-height: 40px; padding: 8px 16px;
-    border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); cursor: pointer;
-    justify-self: start;
+    font: inherit; font-size: .95rem; font-weight: 600; cursor: pointer; justify-self: start;
+    border: 1px solid rgba(255,255,255,.9); border-radius: 14px; min-height: 46px; padding: 9px 18px; margin-top: 16px;
+    color: var(--text); background: rgba(255,255,255,.6);
   }
-  .reset:hover { border-color: var(--primary); color: var(--primary); }
+  @media (min-width: 720px) { .row2 .reset { justify-self: end; } }
+  .reset:hover { background: #fff; }
 
-  main { padding: 20px 16px 40px; }
-  .status {
-    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px;
-    margin: 8px 0 14px;
-  }
-  .count { font-size: 1.1rem; }
-  .count strong { color: var(--primary); font-size: 1.35rem; }
-  .applied { color: var(--muted); font-size: .9rem; }
+  main { padding: 28px 16px 48px; }
+  .status { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 12px; margin: 0 4px 14px; }
+  .count { margin: 0; font-size: 1.05rem; color: var(--muted); }
+  .count strong { color: var(--text); font-size: 1.45rem; font-weight: 800; margin: 0 2px; }
+  .applied { margin: 0; color: var(--muted); font-size: .9rem; }
 
-  .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: 1fr; }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: 1fr; }
   @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 980px) { .grid { grid-template-columns: repeat(3, 1fr); } }
   .card {
-    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-    box-shadow: var(--shadow); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;
+    --c: #f06a4a;
+    border-radius: 22px; padding: 20px 22px 18px;
+    display: flex; flex-direction: column; gap: 14px;
+    transition: transform .2s, background .2s;
   }
-  .card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .field-tag {
-    background: var(--primary-soft); color: var(--primary); font-weight: 700; font-size: .82rem;
-    padding: 3px 10px; border-radius: 999px;
-  }
-  .sid { color: var(--muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
-  .card h2 { margin: 0; font-size: 1.15rem; letter-spacing: -0.01em; }
-  mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1px; }
-  dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: .95rem; }
-  dt { color: var(--muted); }
-  dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .online { display: inline-block; font-size: .85rem; font-weight: 700; padding: 2px 10px; border-radius: 6px; }
-  .online.yes { background: var(--ok-soft); color: var(--ok); }
-  .online.no { background: var(--no-soft); color: var(--no); }
+  .card:hover { transform: translateY(-2px); background: var(--glass-strong); }
+  .card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: .84rem; color: var(--muted); }
+  .card-head .fld { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--c); }
+  .card-head .fld svg { width: 16px; height: 16px; }
+  .card h2 { margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.35; }
+  mark { background: linear-gradient(transparent 58%, rgba(255, 214, 90, .8) 58%); color: inherit; padding: 0 1px; }
+  .facts { display: flex; margin: 0; padding-top: 12px; border-top: 1px solid rgba(31,38,64,.08); }
+  .fact { flex: 1; }
+  .fact + .fact { padding-left: 14px; border-left: 1px solid rgba(31,38,64,.08); margin-left: 14px; }
+  .fact dt { font-size: .78rem; color: var(--muted); }
+  .fact dd { margin: 1px 0 0; font-weight: 700; font-size: 1rem; font-variant-numeric: tabular-nums; }
+  .fact dd.free { color: var(--ok); }
+  .fact dd.yes { color: var(--ok); }
+  .fact dd.no { color: var(--no); }
+  .org { font-size: .88rem; color: var(--muted); }
+  .org strong { color: var(--text); font-weight: 600; margin-left: 4px; }
 
-  .empty {
-    text-align: center; padding: 48px 16px; background: var(--surface); border: 1px dashed var(--line);
-    border-radius: var(--radius); color: var(--muted);
-  }
-  .empty strong { display: block; color: var(--text); font-size: 1.1rem; margin-bottom: 6px; }
-  .empty button { margin-top: 14px; }
-
-  footer { color: var(--muted); font-size: .85rem; text-align: center; padding: 0 16px 32px; }
-  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .empty { text-align: center; padding: 44px 16px; border-radius: 22px; }
+  .empty strong { display: block; font-size: 1.12rem; margin-bottom: 4px; }
+  .empty p { margin: 0; color: var(--muted); }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 16px 36px; }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
 </style>
 </head>
 <body>
 <a class="skip" href="#results">검색 결과로 바로가기</a>
 
-<header>
+<div class="bg" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+<header class="hero">
   <div class="wrap">
-    <h1>민원서비스 찾기</h1>
-    <p>서비스명을 입력하거나 민원분야를 선택하면 필요한 민원 서비스를 바로 찾을 수 있습니다.</p>
+    <div class="hello">반갑습니다</div>
+    <h1>어떤 민원을 찾고 계신가요?</h1>
+    <p>서비스 이름을 입력하거나 분야를 골라 보세요. 필요한 민원을 바로 찾아 드려요.</p>
   </div>
 </header>
 
-<section class="panel wrap" aria-label="검색 및 필터">
-  <label class="search-label" for="q">서비스명 검색</label>
+<section class="panel wrap glass" aria-label="검색 및 필터">
+  <label class="sr-only" for="q" style="position:absolute;left:-9999px">서비스명 검색</label>
   <div class="search-box">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="q" type="search" placeholder="예: 등본, 여권, 건축허가" autocomplete="off" aria-describedby="qHint">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="서비스명을 입력해 주세요 (예: 등본, 여권)" autocomplete="off">
     <button id="clearQ" type="button" aria-label="검색어 지우기">×</button>
   </div>
-  <p class="hint" id="qHint">띄어쓰기와 관계없이 검색됩니다. 선택한 필터와 함께 적용됩니다.</p>
+  <div class="quick" id="quick"><span>자주 찾는 민원</span></div>
 
   <fieldset>
-    <legend>민원분야</legend>
-    <div class="chips" id="fieldChips" role="group" aria-label="민원분야 선택"></div>
+    <legend class="label">민원분야</legend>
+    <div class="chips" id="fieldChips"></div>
   </fieldset>
 
   <div class="row2">
-    <fieldset style="margin:0">
-      <legend>온라인 처리</legend>
-      <div class="seg" id="onlineSeg" role="group" aria-label="온라인 처리 여부">
+    <fieldset>
+      <legend class="label">온라인 처리</legend>
+      <div class="seg" id="onlineSeg">
         <button type="button" data-v="" aria-pressed="true">전체</button>
         <button type="button" data-v="가능" aria-pressed="false">가능</button>
         <button type="button" data-v="불가" aria-pressed="false">불가</button>
       </div>
     </fieldset>
-    <div class="sort">
-      <label for="sort">정렬</label>
+    <div>
+      <label class="label" for="sort">정렬</label>
       <select id="sort">
-        <option value="id">기본순 (서비스ID)</option>
+        <option value="id">기본순</option>
         <option value="days-asc">처리기한 짧은 순</option>
         <option value="days-desc">처리기한 긴 순</option>
         <option value="fee-asc">수수료 낮은 순</option>
@@ -242,13 +206,13 @@
 
 <main class="wrap" id="results" tabindex="-1">
   <div class="status">
-    <p class="count" id="count" aria-live="polite" style="margin:0"></p>
-    <p class="applied" id="applied" style="margin:0"></p>
+    <p class="count" id="count" aria-live="polite"></p>
+    <p class="applied" id="applied"></p>
   </div>
   <ul class="grid" id="list"></ul>
-  <div class="empty" id="empty" hidden>
-    <strong>조건에 맞는 민원 서비스가 없습니다.</strong>
-    검색어를 줄이거나 다른 민원분야를 선택해 보세요.<br>
+  <div class="empty glass" id="empty" hidden>
+    <strong>앗, 찾으시는 민원이 없어요</strong>
+    <p>검색어를 짧게 바꾸거나 다른 분야를 선택해 보세요.</p>
     <button type="button" class="reset" id="resetBtn2">↺ 조건 초기화</button>
   </div>
 </main>
@@ -282,30 +246,50 @@
     {"서비스ID":"S022","서비스명":"여권 재발급","소관기관":"교통행정과","민원분야":"여권","온라인처리":"가능","처리기한일":1,"수수료":1000}
   ];
 
+  // 분야별 색상·아이콘
+  const P = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const THEME = {
+    "주민등록": { c: "#3b8cff", s: "#e6f0ff", i: P('<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.5 1.7-2 3-2s2.4.5 3 2M14 10h4M14 13h3"/>') },
+    "건축":     { c: "#ff8a3d", s: "#fff0e3", i: P('<path d="M3 21h18M5 21V10l7-5 7 5v11"/><path d="M10 21v-5h4v5"/>') },
+    "세무":     { c: "#1fb57a", s: "#e3f8ee", i: P('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/>') },
+    "복지":     { c: "#f25c8b", s: "#ffe9f0", i: P('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>') },
+    "교통":     { c: "#8b5cf6", s: "#f0eaff", i: P('<path d="M5 16V11l2-5h10l2 5v5M5 16h14M5 16v2M19 16v2"/><circle cx="8" cy="13.5" r=".6"/><circle cx="16" cy="13.5" r=".6"/>') },
+    "환경":     { c: "#14b8a6", s: "#e0f7f4", i: P('<path d="M5 19c0-8 6-13 14-14-1 8-6 14-14 14z"/><path d="M5 19l7-7"/>') },
+    "위생":     { c: "#e5a800", s: "#fff6d6", i: P('<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>') },
+    "여권":     { c: "#4f6bed", s: "#e8ecff", i: P('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>') }
+  };
+  const th = (f) => THEME[f] || { c: "#ff7a59", s: "#fff0e8", i: "" };
+
   const state = { q: "", field: "", online: "", sort: "id" };
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const norm = (s) => String(s).replace(/\s+/g, "").toLowerCase();
   const won = (n) => (n === 0 ? "무료" : n.toLocaleString("ko-KR") + "원");
-
-  // 민원분야 목록 (자료 등장 순서)
   const FIELDS = [...new Set(DATA.map((d) => d["민원분야"]))];
+
+  // 빠른 검색어 (자료 속 서비스명에서 추출)
+  ["등본", "전입", "여권", "자동차", "기초연금", "건축허가"].forEach((w) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = w;
+    b.addEventListener("click", () => { state.q = w; $("q").value = w; apply(); });
+    $("quick").appendChild(b);
+  });
 
   function renderChips() {
     const all = [{ v: "", label: "전체", n: DATA.length }].concat(
       FIELDS.map((f) => ({ v: f, label: f, n: DATA.filter((d) => d["민원분야"] === f).length }))
     );
-    $("fieldChips").innerHTML = all.map((c) =>
-      `<button type="button" class="chip" data-v="${esc(c.v)}" aria-pressed="${state.field === c.v}">${esc(c.label)}<span class="n">${c.n}</span></button>`
-    ).join("");
+    $("fieldChips").innerHTML = all.map((c) => {
+      const t = c.v ? th(c.v) : { c: "#ff7a59", s: "#fff0e8", i: P('<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>') };
+      return `<button type="button" class="chip" style="--c:${t.c};--s:${t.s}" data-v="${esc(c.v)}" aria-pressed="${state.field === c.v}"><span class="ic">${t.i}</span>${esc(c.label)} <span class="n">${c.n}</span></button>`;
+    }).join("");
   }
 
   // 공백 무시 검색 + 일치 부분 강조
   function highlight(name, q) {
     const nq = norm(q);
     if (!nq) return esc(name);
-    const chars = [...name];
-    const idx = []; // 공백 제외 문자 → 원래 위치
+    const chars = [...name], idx = [];
     chars.forEach((ch, i) => { if (!/\s/.test(ch)) idx.push(i); });
     const compact = idx.map((i) => chars[i]).join("").toLowerCase();
     const on = new Array(chars.length).fill(false);
@@ -320,40 +304,39 @@
       if (!on[i] && open && !/\s/.test(ch)) { out += "</mark>"; open = false; }
       out += esc(ch);
     });
-    if (open) out += "</mark>";
-    return out;
+    return open ? out + "</mark>" : out;
   }
 
   function apply() {
     const nq = norm(state.q);
-    let rows = DATA.filter((d) =>
+    const byId = (a, b) => a["서비스ID"].localeCompare(b["서비스ID"]);
+    const sorts = {
+      "id": byId,
+      "days-asc": (a, b) => a["처리기한일"] - b["처리기한일"] || byId(a, b),
+      "days-desc": (a, b) => b["처리기한일"] - a["처리기한일"] || byId(a, b),
+      "fee-asc": (a, b) => a["수수료"] - b["수수료"] || byId(a, b),
+      "fee-desc": (a, b) => b["수수료"] - a["수수료"] || byId(a, b)
+    };
+    const rows = DATA.filter((d) =>
       (!nq || norm(d["서비스명"]).includes(nq)) &&
       (!state.field || d["민원분야"] === state.field) &&
       (!state.online || d["온라인처리"] === state.online)
-    );
-    const by = {
-      "id": (a, b) => a["서비스ID"].localeCompare(b["서비스ID"]),
-      "days-asc": (a, b) => a["처리기한일"] - b["처리기한일"] || a["서비스ID"].localeCompare(b["서비스ID"]),
-      "days-desc": (a, b) => b["처리기한일"] - a["처리기한일"] || a["서비스ID"].localeCompare(b["서비스ID"]),
-      "fee-asc": (a, b) => a["수수료"] - b["수수료"] || a["서비스ID"].localeCompare(b["서비스ID"]),
-      "fee-desc": (a, b) => b["수수료"] - a["수수료"] || a["서비스ID"].localeCompare(b["서비스ID"])
-    };
-    rows = rows.slice().sort(by[state.sort]);
+    ).sort(sorts[state.sort]);
 
-    $("list").innerHTML = rows.map((d) => `
-      <li class="card">
-        <div class="card-top">
-          <span class="field-tag">${esc(d["민원분야"])}</span>
-          <span class="sid">${esc(d["서비스ID"])}</span>
-        </div>
+    $("list").innerHTML = rows.map((d) => {
+      const t = th(d["민원분야"]), ok = d["온라인처리"] === "가능";
+      return `
+      <li class="card glass" style="--c:${t.c}">
+        <div class="card-head"><span class="fld">${t.i}${esc(d["민원분야"])}</span><span>${esc(d["서비스ID"])}</span></div>
         <h2>${highlight(d["서비스명"], state.q)}</h2>
-        <dl>
-          <dt>소관기관</dt><dd>${esc(d["소관기관"])}</dd>
-          <dt>온라인처리</dt><dd><span class="online ${d["온라인처리"] === "가능" ? "yes" : "no"}">${d["온라인처리"] === "가능" ? "✓ 가능" : "✕ 불가"}</span></dd>
-          <dt>처리기한</dt><dd>${esc(d["처리기한일"])}일</dd>
-          <dt>수수료</dt><dd>${won(d["수수료"])}</dd>
+        <dl class="facts">
+          <div class="fact"><dt>처리기한</dt><dd>${esc(d["처리기한일"])}일</dd></div>
+          <div class="fact"><dt>수수료</dt><dd class="${d["수수료"] === 0 ? "free" : ""}">${won(d["수수료"])}</dd></div>
+          <div class="fact"><dt>온라인 처리</dt><dd class="${ok ? "yes" : "no"}">${esc(d["온라인처리"])}</dd></div>
         </dl>
-      </li>`).join("");
+        <div class="org">소관기관<strong>${esc(d["소관기관"])}</strong></div>
+      </li>`;
+    }).join("");
 
     $("count").innerHTML = `전체 ${DATA.length}건 중 <strong>${rows.length}</strong>건 표시`;
     const tags = [];
@@ -376,8 +359,8 @@
   $("q").addEventListener("input", (e) => { state.q = e.target.value; apply(); });
   $("q").addEventListener("keydown", (e) => { if (e.key === "Escape") { state.q = ""; e.target.value = ""; apply(); } });
   $("clearQ").addEventListener("click", () => { state.q = ""; $("q").value = ""; apply(); $("q").focus(); });
-  $("fieldChips").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (!b) return; state.field = b.dataset.v; apply(); });
-  $("onlineSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; state.online = b.dataset.v; apply(); });
+  $("fieldChips").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) { state.field = b.dataset.v; apply(); } });
+  $("onlineSeg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { state.online = b.dataset.v; apply(); } });
   $("sort").addEventListener("change", (e) => { state.sort = e.target.value; apply(); });
   $("resetBtn").addEventListener("click", reset);
   $("resetBtn2").addEventListener("click", reset);
